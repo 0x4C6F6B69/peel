@@ -42,7 +42,7 @@ public static class Converter
         if (fiatAmount < 0) {
             throw new ArgumentOutOfRangeException(nameof(fiatAmount), $"{nameof(fiatAmount)} cannot be lesser than zero.");
         }
-        if (fiatAmount < 0) {
+        if (btcUnitPrice < 0) {
             throw new ArgumentOutOfRangeException(nameof(btcUnitPrice), $"{nameof(btcUnitPrice)} cannot be lesser than zero.");
         }
         
@@ -51,7 +51,7 @@ public static class Converter
         decimal btc = fiatAmount / btcUnitPrice;
         decimal satsDec = btc * SATS_PER_BTC;
 
-        // floor to whole satoshis
+        // floor to whole satoshi value
         return (long)decimal.Floor(satsDec);
     }
 }
