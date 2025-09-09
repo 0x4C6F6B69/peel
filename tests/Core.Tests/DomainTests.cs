@@ -8,12 +8,12 @@ using Xunit.Abstractions;
 public class DomainTests(ITestOutputHelper output)
 {
     [Fact]
-    public async Task Get_all_summary_types_searching_in_BTC() => _ = await GetOffersSummaryAndAssertAsync(
+    public async Task Get_all_summary_types_searching_in_EUR() => _ = await GetOffersSummaryAndAssertAsync(
         new OfferSearchCriteriaDefault
         {
             Type = CriteriaType.Default,
             OfferType = Peel.Domain.OfferTypeFilter.All,
-            Amount = new OfferAmount(CurrencyType.Btc, 100m, 1000m),
+            Amount = new OfferAmount(CurrencyType.Fiat, 100m, 1000m),
             MeansOfPayment = new() { ["EUR"] = ["sepa"] },
         },
         summeries => Assert.All(summeries, s =>
