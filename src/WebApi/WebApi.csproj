@@ -8,8 +8,8 @@
     <AssemblyName>Peel.WebApi</AssemblyName>
     <Version>0.1.0</Version>
     <Title>Peel Web API</Title>
-    <Authors>nodeninja6</Authors>
-    <RootNamespace>AuthPeach</RootNamespace>
+    <Authors>0x4C6F6B69</Authors>
+    <RootNamespace>Peel</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
