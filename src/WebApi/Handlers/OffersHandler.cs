@@ -6,7 +6,9 @@ using Peel;
 using Peel.Configuration;
 using Peel.Domain;
 using Peel.Infrastructure;
+using Peel.Models;
 using SharpX;
+using SharpX.Extensions;
 
 namespace Peel.Handlers;
 
@@ -22,7 +24,23 @@ public class OffersHandler(//ILogger<OffersHandler> logger,
         var (error, btcUnitPrice) = await GetBtcMarketPriceAsync();
         if (error != null) { return error; }
 
-        return Results.Ok(await facade.GetOffersSummaryAsync(filter, btcUnitPrice!.Value));
+        var result = await facade.GetOffersSummaryAsync(filter, btcUnitPrice!.Value);
+
+        SummaryResponse response = new()
+        {
+            Summaries = result.Value ?? [],
+            Errors = result.Errors.IsEmpty() ? null : [.. result.Errors.Distinct()],
+            BtcUnitPrice = btcUnitPrice.Value
+        };
+
+        return response.Errors.IsEmpty()
+            ? Results.Ok(response)
+            : Results.BadRequest(new ErrorResult((int)HttpStatusCode.BadRequest)
+            {
+                Status = (int)HttpStatusCode.BadRequest,
+                Detail = "Some errors occurred while processing the request.",
+                Errors = [.. response.Errors!]
+            });
     }
 
     public async Task<IResult> GetSingleOfferSummaryAsync(string id)
@@ -36,6 +54,7 @@ public class OffersHandler(//ILogger<OffersHandler> logger,
             ? Results.Ok(summary)
             : Results.NotFound(new ErrorResult((int)HttpStatusCode.NotFound)
             {
+                Status = (int)HttpStatusCode.NotFound,
                 Detail = $"Offer Summary with id '{id}' not found."
             });
     }
