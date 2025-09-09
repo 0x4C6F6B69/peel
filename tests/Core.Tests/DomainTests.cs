@@ -4,6 +4,7 @@ using Peel.Domain;
 using SharpX;
 using SharpX.Extensions;
 using Xunit.Abstractions;
+using Converter = Peel.Infrastructure.Converter;
 
 public class DomainTests(ITestOutputHelper output)
 {
@@ -16,20 +17,47 @@ public class DomainTests(ITestOutputHelper output)
             Amount = new OfferAmount(CurrencyType.Fiat, 100m, 1000m),
             MeansOfPayment = new() { ["EUR"] = ["sepa"] },
         },
-        summeries => Assert.All(summeries, s =>
+        (summeries, _) => Assert.All(summeries, summary =>
         {
-            if (s.Type == OfferSummaryType.Sell) {
-                Assert.InRange(s.Quote.PriceFiat, 100m, 1000m);
+            if (summary.Type == OfferSummaryType.Sell) {
+                Assert.InRange(summary.Quote.PriceFiat, 100m, 1000m);
             }
             else {
-                Assert.True(s.Quote.PriceFiat >= 100m && s.QuoteMax!.PriceFiat <= 1000m,
-                    userMessage: $"Summary (offer: {s.ReferenceId}) not in range");
+                Assert.True(summary.Quote.PriceFiat >= 100m && summary.QuoteMax!.PriceFiat <= 1000m,
+                    userMessage: $"Summary (offer: {summary.ReferenceId}) not in range");
             }
         })
     );
 
+    [Fact]
+    public async Task Check_correctness_of_summaries_conversions_searching_in_EUR() => _ = await GetOffersSummaryAndAssertAsync(
+        new OfferSearchCriteriaDefault
+        {
+            Type = CriteriaType.Default,
+            OfferType = Peel.Domain.OfferTypeFilter.Buy,
+            Amount = new OfferAmount(CurrencyType.Fiat, 100m, 1000m),
+            MeansOfPayment = new() { ["EUR"] = ["sepa"] },
+        },
+        (summeries, btcUnitPrice) => Assert.All(summeries, summary =>
+        {
+            var quoteBtc = Converter.SatoshiToBitcoin((long)summary.Quote.AmountSat);
+            Assert.Equal(quoteBtc, summary.Quote.AmountBtc);
+            var quoteFiat = quoteBtc * btcUnitPrice;
+            Assert.Equal(quoteFiat, summary.Quote.PriceFiat);
+            var quoteSat = Converter.FiatToSatoshi(quoteFiat, btcUnitPrice);
+            Assert.Equal(quoteSat, (long)summary.Quote.AmountSat);
+
+            var quoteMaxBtc = Converter.SatoshiToBitcoin((long)summary.QuoteMax!.AmountSat);
+            Assert.Equal(quoteMaxBtc, summary.QuoteMax.AmountBtc);
+            var quoteMaxFiat = quoteMaxBtc * btcUnitPrice;
+            Assert.Equal(quoteMaxFiat, summary.QuoteMax.PriceFiat);
+            var quoteMaxSat = Converter.FiatToSatoshi(quoteMaxFiat, btcUnitPrice);
+            Assert.Equal(quoteMaxSat, (long)summary.QuoteMax.AmountSat);
+        })
+);
+
     private async Task<List<OfferSummary>> GetOffersSummaryAndAssertAsync(
-        OfferSearchCriteria criteria, Action<IEnumerable<OfferSummary>>? assert = null, bool failOnEmpty = false)
+        OfferSearchCriteria criteria, Action<IEnumerable<OfferSummary>, decimal>? assert = null, bool failOnEmpty = false)
     {
         var facade = Factory.CreateFacade();
 
@@ -46,7 +74,7 @@ public class DomainTests(ITestOutputHelper output)
         var summaries = result.Value;
         if (!summaries.IsEmpty()) {
             Assert.NotEmpty(summaries!);
-            assert?.Invoke(summaries!);
+            assert?.Invoke(summaries!, btcUnitPrice);
             output.WriteLine(ObjectDumper.Dump(summaries));
         }
         else {
