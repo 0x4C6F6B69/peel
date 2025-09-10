@@ -17,14 +17,21 @@ public enum OfferSummaryType
     Buy // bid
 }
 
-public record class OfferSummary
+/// <summary>
+/// Contains properties in common form default and flat derivates.
+/// </summary>
+public abstract record class OfferSummaryBase
 {
     public required string Id { get; init; }
     public required string ReferenceId { get; init; }
     public required OfferSummaryType Type { get; init; }
     public DateTime? PublishingDate { get; set; }
+    public decimal? SpreadPc { get; set; }
+}
+
+public record class OfferSummary : OfferSummaryBase
+{
     public required OfferQuote Quote { get; init; }
     public OfferQuote? QuoteMax { get; set; }
     public required Dictionary<string, List<string>> MeansOfPayment { get; init; }
-    public decimal? SpreadPc { get; set; }
 }
