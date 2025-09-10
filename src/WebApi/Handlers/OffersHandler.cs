@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.NetworkInformation;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Peel;
@@ -16,9 +17,16 @@ public class OffersHandler(//ILogger<OffersHandler> logger,
     IOptions<SystemConfig> options,
     PeachFacade facade)
 {
-    private SystemConfig config = options.Value;
+    private SystemConfig _config = options.Value;
+    private static JsonSerializerOptions _jsonOptions  = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        //WriteIndented = true
+    };
 
-    public async Task<IResult> GetOffersSummaryAsync(OfferSearchCriteria filter,
+public async Task<IResult> GetOffersSummaryAsync(OfferSearchCriteria filter,
+        [FromQuery] bool flat = false,
         CancellationToken cancellationToken = default)
     {
         var (error, btcUnitPrice) = await GetBtcMarketPriceAsync();
@@ -26,21 +34,23 @@ public class OffersHandler(//ILogger<OffersHandler> logger,
 
         var result = await facade.GetOffersSummaryAsync(filter, btcUnitPrice!.Value);
 
-        SummaryResponse response = new()
-        {
-            Summaries = result.Value ?? [],
-            Errors = result.Errors.IsEmpty() ? null : [.. result.Errors.Distinct()],
-            BtcUnitPrice = btcUnitPrice.Value
-        };
-
-        return response.Errors.IsEmpty()
-            ? Results.Ok(response)
-            : Results.BadRequest(new ErrorResult((int)HttpStatusCode.BadRequest)
+        var errors = result.Errors.IsEmpty() ? null : result.Errors.Distinct().ToList();
+        if (!result.IsSuccess) {
+            return Results.Problem(new ProblemDetails()
             {
                 Status = (int)HttpStatusCode.BadRequest,
                 Detail = "Some errors occurred while processing the request.",
-                Errors = [.. response.Errors!]
+                Extensions = { ["errors"] = errors ?? [] }
             });
+        }
+
+        return !flat
+            ? Results.Ok(new SummaryResponse<OfferSummary> {
+                Summaries = result.Value ?? [], Errors = errors, BtcUnitPrice = btcUnitPrice.Value })
+            : Results.Ok(new SummaryResponse<OfferSummaryFlat> {
+                Summaries = result.Value != null
+                    ? [.. result.Value.Select(s => s.Flatten(_jsonOptions))] : [],
+                    Errors = errors, BtcUnitPrice = btcUnitPrice.Value });
     }
 
     public async Task<IResult> GetSingleOfferSummaryAsync(string id)
@@ -65,7 +75,8 @@ public class OffersHandler(//ILogger<OffersHandler> logger,
            .WithName("OffersSummaryGet")
            .WithOpenApi()
            .Accepts<OfferSearchCriteria>("application/json")
-           .Produces<List<OfferSummary>>(StatusCodes.Status200OK)
+           .Produces<SummaryResponse<OfferSummary>>(StatusCodes.Status200OK)
+           .Produces<SummaryResponse<OfferSummaryFlat>>(StatusCodes.Status200OK)
            .Produces<ValidationProblemDetails>(StatusCodes.Status400BadRequest)
            .Produces<ErrorResult>(StatusCodes.Status400BadRequest);
 
@@ -81,10 +92,10 @@ public class OffersHandler(//ILogger<OffersHandler> logger,
 
     private async Task<(IResult?, decimal?)> GetBtcMarketPriceAsync()
     {
-        if (!(await facade.GetBtcMarketPriceAsync(config.DefaultFiat)).MatchJust(out var btcUnitPrice)) {
+        if (!(await facade.GetBtcMarketPriceAsync(_config.DefaultFiat)).MatchJust(out var btcUnitPrice)) {
             return (Results.BadRequest(new ErrorResult((int)HttpStatusCode.BadRequest)
             {
-                Detail = $"Failed to get BTC market price in {config.DefaultFiat}."
+                Detail = $"Failed to get BTC market price in {_config.DefaultFiat}."
             }), null);
         }
 

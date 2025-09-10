@@ -2,9 +2,10 @@
 
 namespace Peel.Models;
 
-public class SummaryResponse
+public class SummaryResponse<TSummary>
+    where TSummary : OfferSummaryBase
 {
-    public required List<OfferSummary> Summaries { get; init; }
+    public required List<TSummary> Summaries { get; init; }
 
     public List<string>? Errors { get; init; }
 
