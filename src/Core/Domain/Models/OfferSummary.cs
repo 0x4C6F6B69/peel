@@ -2,7 +2,7 @@ namespace Peel.Domain;
 
 public record class OfferQuote
 {
-    public decimal AmountSat { get; init; }
+    public long AmountSat { get; init; }
     public decimal AmountBtc { get; init; }
     /// <summary>
     /// Represents the base price excluding the Premium spread increment (applicable only to Sell offers).
