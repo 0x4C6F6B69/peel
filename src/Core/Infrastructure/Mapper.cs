@@ -61,15 +61,15 @@ public class Mapper
     {
         var amountBtc = Converter.SatoshiToBitcoin((long)offer.Amount.ElementAt(0));
         var basePrice = amountBtc * btcUnitPrice;
-        var priceFiat = offer.Type == OfferType.Ask
+        var price = offer.Type == OfferType.Ask
             ? Percent.Increase(basePrice, offer.Premium!.Value)
             : basePrice;
         OfferQuote quote = new()
         {
             AmountSat = offer.Amount.ElementAt(0),
             AmountBtc = amountBtc,
-            PriceFiat = priceFiat,
-            PriceFiatBase = offer.Type == OfferType.Ask ? basePrice : null
+            PriceFiat = Math.Round(price, 2),
+            PriceFiatBase = offer.Type == OfferType.Ask ? Math.Round(basePrice, 2) : null
         };
 
         OfferQuote? quoteMax = null;
@@ -80,7 +80,7 @@ public class Mapper
             {
                 AmountSat = offer.Amount.ElementAt(1),
                 AmountBtc = amountBtcMax,
-                PriceFiat = basePriceMax
+                PriceFiat = Math.Round(basePriceMax, 2)
             };
         }
 
