@@ -66,7 +66,7 @@ public class Mapper
             : basePrice;
         OfferQuote quote = new()
         {
-            AmountSat = offer.Amount.ElementAt(0),
+            AmountSat = (long)offer.Amount.ElementAt(0),
             AmountBtc = amountBtc,
             PriceFiat = Math.Round(price, 2),
             PriceFiatBase = offer.Type == OfferType.Ask ? Math.Round(basePrice, 2) : null
@@ -78,7 +78,7 @@ public class Mapper
             var basePriceMax = amountBtcMax * btcUnitPrice;
             quoteMax = new()
             {
-                AmountSat = offer.Amount.ElementAt(1),
+                AmountSat = (long)offer.Amount.ElementAt(1),
                 AmountBtc = amountBtcMax,
                 PriceFiat = Math.Round(basePriceMax, 2)
             };
