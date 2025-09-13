@@ -1,6 +1,8 @@
-﻿using System.Text.Json;
-using Peel.Domain;
+﻿using System.Globalization;
+using System.Text.Json;
+using CsvHelper;
 using Microsoft.Extensions.Logging;
+using Peel.Domain;
 using SharpX;
 using SharpX.Extensions;
 
@@ -17,5 +19,22 @@ public static class EitherExtensions
         }
 
         return either;
+    }
+}
+
+public static class CsvExtensions
+{
+    /// <summary>
+    /// Converts a list of records to a CSV string.
+    /// </summary>
+    public static async Task<string> ToCsvTextAsync<T>(this IEnumerable<T> records)
+    {
+        await using var writer = new StringWriter();
+        using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
+
+        csv.WriteRecords(records);
+        await writer.FlushAsync();
+
+        return writer.ToString();
     }
 }

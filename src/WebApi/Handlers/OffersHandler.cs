@@ -1,6 +1,8 @@
-﻿using System.Net;
+﻿using System.Diagnostics;
+using System.Net;
 using System.Net.NetworkInformation;
 using System.Text.Json;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Peel;
@@ -18,16 +20,16 @@ public class OffersHandler(//ILogger<OffersHandler> logger,
     PeachFacade facade)
 {
     private SystemConfig _config = options.Value;
-    private static JsonSerializerOptions _jsonOptions  = new()
+    private static JsonSerializerOptions _jsonOptions = new()
     {
         PropertyNameCaseInsensitive = true,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         //WriteIndented = true
     };
 
-public async Task<IResult> GetOffersSummaryAsync(OfferSearchCriteria filter,
-        [FromQuery] bool flat = false,
-        CancellationToken cancellationToken = default)
+    public async Task<IResult> GetOffersSummaryAsync(OfferSearchCriteria filter,
+            [FromQuery] SummaryFormat format = SummaryFormat.Default,
+            CancellationToken cancellationToken = default)
     {
         var (error, btcUnitPrice) = await GetBtcMarketPriceAsync();
         if (error != null) { return error; }
@@ -44,22 +46,29 @@ public async Task<IResult> GetOffersSummaryAsync(OfferSearchCriteria filter,
             });
         }
 
-        return !flat
-            ? Results.Ok(new SummaryResponse<OfferSummary>
+        return format switch
+        {
+            SummaryFormat.Default => Results.Ok(new SummaryResponse<OfferSummary>()
             {
                 Summaries = result.Value ?? [],
                 Errors = errors,
                 DefaultFiat = _config.DefaultFiat,
                 BtcUnitPrice = btcUnitPrice.Value
-            })
-            : Results.Ok(new SummaryResponse<OfferSummaryFlat>
+            }),
+            SummaryFormat.Flat => Results.Ok(new SummaryResponse<OfferSummaryFlat>
             {
-                Summaries = result.Value != null
-                    ? [.. result.Value.Select(s => s.Flatten(_jsonOptions))] : [],
+                Summaries = FlattenSummaries(),
                 Errors = errors,
                 DefaultFiat = _config.DefaultFiat,
                 BtcUnitPrice = btcUnitPrice.Value
-            });
+            }),
+            SummaryFormat.Csv => Results.Text(
+                await FlattenSummaries().ToCsvTextAsync(),
+                contentType: "text/csv"),
+            _ => throw new UnreachableException($"Unsupported format: {format}."),
+        };
+
+        List<OfferSummaryFlat> FlattenSummaries() => [.. result.Value.Select(s => s.Flatten(_jsonOptions))];
     }
 
     public async Task<IResult> GetSingleOfferSummaryAsync(string id)
@@ -84,6 +93,7 @@ public async Task<IResult> GetOffersSummaryAsync(OfferSearchCriteria filter,
            .WithName("OffersSummaryGet")
            .WithOpenApi()
            .Accepts<OfferSearchCriteria>("application/json")
+           .Produces<string>(StatusCodes.Status200OK, "text/csv")
            .Produces<SummaryResponse<OfferSummary>>(StatusCodes.Status200OK)
            .Produces<SummaryResponse<OfferSummaryFlat>>(StatusCodes.Status200OK)
            .Produces<ValidationProblemDetails>(StatusCodes.Status400BadRequest)
