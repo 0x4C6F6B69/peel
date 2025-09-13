@@ -45,12 +45,21 @@ public async Task<IResult> GetOffersSummaryAsync(OfferSearchCriteria filter,
         }
 
         return !flat
-            ? Results.Ok(new SummaryResponse<OfferSummary> {
-                Summaries = result.Value ?? [], Errors = errors, BtcUnitPrice = btcUnitPrice.Value })
-            : Results.Ok(new SummaryResponse<OfferSummaryFlat> {
+            ? Results.Ok(new SummaryResponse<OfferSummary>
+            {
+                Summaries = result.Value ?? [],
+                Errors = errors,
+                DefaultFiat = _config.DefaultFiat,
+                BtcUnitPrice = btcUnitPrice.Value
+            })
+            : Results.Ok(new SummaryResponse<OfferSummaryFlat>
+            {
                 Summaries = result.Value != null
                     ? [.. result.Value.Select(s => s.Flatten(_jsonOptions))] : [],
-                    Errors = errors, BtcUnitPrice = btcUnitPrice.Value });
+                Errors = errors,
+                DefaultFiat = _config.DefaultFiat,
+                BtcUnitPrice = btcUnitPrice.Value
+            });
     }
 
     public async Task<IResult> GetSingleOfferSummaryAsync(string id)

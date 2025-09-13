@@ -9,5 +9,7 @@ public class SummaryResponse<TSummary>
 
     public List<string>? Errors { get; init; }
 
+    public required string DefaultFiat { get; init; }
+
     public required decimal BtcUnitPrice { get; init; }
 }
