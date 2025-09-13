@@ -55,14 +55,10 @@ public sealed class ErrorResult
 }
 #endregion
 
-public record class VolatiltiyRequest(
-    string FiatCurrency,
-    float Hours
-);
-
 public record class VolatilityResponse(
     VolatilityLevel Level,
-    double Score
+    double Score,
+    string DefaultFiat
 );
 
 public enum VolatilityLevel : byte
