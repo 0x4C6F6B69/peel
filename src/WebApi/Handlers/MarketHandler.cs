@@ -1,5 +1,7 @@
 ﻿using System.Net;
+using Microsoft.Extensions.Options;
 using Peel;
+using Peel.Configuration;
 using Peel.Domain;
 using Peel.Infrastructure;
 using Peel.Market;
@@ -9,38 +11,31 @@ namespace Peel.Handlers;
 
 public static class MarketHandler
 {
-    public static async Task<IResult> GetVolatilittAsync(ILoggerFactory loggerFactory,
-        HttpContext context,
+    public static async Task<IResult> GetVolatilittAsync(
+        //LoggerFactory loggerFactory,
+        IOptions<SystemConfig> options,
         MarketAnalyzer market,
+        float hours,
         CancellationToken cancellationToken = default)
     {
-        var logger = loggerFactory.CreateLogger(typeof(OffersHandler));
+        //var logger = loggerFactory.CreateLogger(typeof(MarketHandler));
+        var config = options.Value;
 
-        var rawRequest = (await context.GetRequestAsync<VolatiltiyRequest>()).LogReturn(logger);
-        if (rawRequest.MatchLeft(out var error)) {
-            return Results.BadRequest(new ErrorResult((int)HttpStatusCode.BadRequest)
-            {
-                Detail = error.Message
-            });
-        }
-        var request = rawRequest.FromRight();
-
-        if (!(await market.ComputeVolatilityAsync(request.FiatCurrency, request.Hours)).MatchJust(out var info)) {
+        if (!(await market.ComputeVolatilityAsync(config.DefaultFiat, hours)).MatchJust(out var info)) {
             return Results.BadRequest(new ErrorResult((int)HttpStatusCode.BadRequest)
             {
                 Detail = "Failed to compute market volatility."
             });
         }
 
-        return Results.Ok(new VolatilityResponse(Level: info.Item1, Score: info.Item2));
+        return Results.Ok(new VolatilityResponse(Level: info.Item1, Score: info.Item2, config.DefaultFiat));
     }
 
     public static WebApplication MapMarketHandler(this WebApplication app)
     {
-        app.MapPost("/market/volatility", GetVolatilittAsync)
+        app.MapGet("/market/volatility/{hours}", GetVolatilittAsync)
            .WithName("VolatilityGet")
            .WithOpenApi()
-           .Accepts<VolatiltiyRequest>("application/json")
            .Produces<VolatilityResponse>();
 
         return app;
