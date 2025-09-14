@@ -5,7 +5,7 @@ public record class OfferQuote
     public long AmountSat { get; init; }
     public decimal AmountBtc { get; init; }
     /// <summary>
-    /// Represents the base price excluding the Premium spread increment (applicable only to Sell offers).
+    /// Represents the base price excluding the Spread increment (applicable only to Sell offers).
     /// </summary>
     public decimal? PriceFiatBase { get; init; }
     public decimal PriceFiat { get; init; }
