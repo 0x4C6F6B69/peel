@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using Peel.Configuration;
 using Peel.Domain;
 using Peel.Infrastructure;
+using Peel.Market;
 using Peel.Web.Models;
 using SharpX;
 using SharpX.Extensions;
@@ -14,7 +15,8 @@ namespace Peel.Web.Handlers;
 
 public class OffersHandler(//ILogger<OffersHandler> logger,
     IOptions<SystemConfig> options,
-    PeachFacade facade)
+    PeachFacade facade,
+    MarketAnalyzer market)
 {
     private SystemConfig _config = options.Value;
     private static JsonSerializerOptions _jsonOptions = new()
@@ -108,7 +110,7 @@ public class OffersHandler(//ILogger<OffersHandler> logger,
 
     private async Task<(IResult?, decimal?)> GetBtcMarketPriceAsync()
     {
-        if (!(await facade.GetBtcMarketPriceAsync(_config.DefaultFiat)).MatchJust(out var btcUnitPrice)) {
+        if (!(await market.GetBtcMarketPriceAsync(_config.DefaultFiat)).MatchJust(out var btcUnitPrice)) {
             return (Results.BadRequest(new ErrorResult((int)HttpStatusCode.BadRequest)
             {
                 Detail = $"Failed to get BTC market price in {_config.DefaultFiat}."

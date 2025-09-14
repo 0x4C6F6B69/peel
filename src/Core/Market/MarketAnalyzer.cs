@@ -3,14 +3,16 @@ using Peel.Configuration;
 using Peel.Domain;
 using Microsoft.Extensions.Options;
 using SharpX;
+using PeachClient;
 
 namespace Peel.Market;
 
-public class MarketAnalyzer(BinanceClient client)
+public class MarketAnalyzer(PeachApiClient peachClient,
+    BinanceClient binanceClient)
 {
     public async Task<Maybe<(VolatilityLevel, double)>> ComputeVolatilityAsync(string fiat, float hours)
     {
-        var candles = await client.GetCandlesAsync($"BTC{fiat.ToUpper()}", "1m", (int)(hours * 60));
+        var candles = await binanceClient.GetCandlesAsync($"BTC{fiat.ToUpper()}", "1m", (int)(hours * 60));
 
         if (candles.Count < 2)
             return Maybe.Nothing<(VolatilityLevel, double)>();
@@ -75,4 +77,7 @@ public class MarketAnalyzer(BinanceClient client)
 
         return (level, score).ToJust();
     }
+
+    public async Task<Maybe<decimal>> GetBtcMarketPriceAsync(string fiat) =>
+        (await peachClient.GetBtcMarketPriceAsync(fiat)).Map(p => p.Price);
 }
