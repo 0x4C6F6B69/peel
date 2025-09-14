@@ -13,8 +13,8 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: true));
     options.SerializerOptions.PropertyNameCaseInsensitive = true;
-    // options.ConfigureOfferSearchCriteriaPolymorphism();
     options.SerializerOptions.Converters.Add(new OfferSearchCriteriaConverter());
+    options.SerializerOptions.UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow;
 });
 
 // Add services to the container.
