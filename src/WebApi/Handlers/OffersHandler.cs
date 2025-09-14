@@ -29,8 +29,16 @@ public class OffersHandler(//ILogger<OffersHandler> logger,
 
     public async Task<IResult> GetOffersSummaryAsync(OfferSearchCriteria filter,
             [FromQuery] SummaryFormat format = SummaryFormat.Default,
+            [FromQuery] SummaryGrouping groupBy = SummaryGrouping.None,
             CancellationToken cancellationToken = default)
     {
+        if (groupBy != SummaryGrouping.None && format != SummaryFormat.Default) {
+            return Results.ValidationProblem(
+                new Dictionary<string, string[]> { { nameof(groupBy), ["Grouping is only allowed with default JSON response"] } },
+                statusCode: (int)HttpStatusCode.BadRequest
+            );
+        }
+
         var (error, btcUnitPrice) = await GetBtcMarketPriceAsync();
         if (error != null) { return error; }
 
@@ -44,6 +52,27 @@ public class OffersHandler(//ILogger<OffersHandler> logger,
                 Detail = "Some errors occurred while processing the request.",
                 Extensions = { ["errors"] = errors ?? [] }
             });
+        }
+
+        if (groupBy != SummaryGrouping.None) {
+            return groupBy switch
+            {
+                SummaryGrouping.Spread => Results.Ok(new SummaryGroupResponse<OfferSummaryBySpreadGroup>()
+                {
+                    Groups = [.. (result.Value ?? []).GroupBySpread()],
+                    Errors = errors,
+                    DefaultFiat = _config.DefaultFiat,
+                    BtcUnitPrice = btcUnitPrice.Value
+                }),
+                SummaryGrouping.FiatPrice => Results.Ok(new SummaryGroupResponse<OfferSummaryByPriceFiatGroup>()
+                {
+                    Groups = [.. (result.Value ?? []).GroupByPriceFiat()],
+                    Errors = errors,
+                    DefaultFiat = _config.DefaultFiat,
+                    BtcUnitPrice = btcUnitPrice.Value
+                }),
+                _ => throw new UnreachableException($"Unsupported grouping: {groupBy}."),
+            };
         }
 
         return format switch
@@ -96,6 +125,8 @@ public class OffersHandler(//ILogger<OffersHandler> logger,
            .Produces<string>(StatusCodes.Status200OK, "text/csv")
            .Produces<SummaryResponse<OfferSummary>>(StatusCodes.Status200OK)
            .Produces<SummaryResponse<OfferSummaryFlat>>(StatusCodes.Status200OK)
+           .Produces<SummaryGroupResponse<OfferSummaryBySpreadGroup>>(StatusCodes.Status200OK)
+           .Produces<SummaryGroupResponse<OfferSummaryByPriceFiatGroup>>(StatusCodes.Status200OK)
            .Produces<ValidationProblemDetails>(StatusCodes.Status400BadRequest)
            .Produces<ErrorResult>(StatusCodes.Status400BadRequest);
 

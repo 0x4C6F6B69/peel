@@ -6,3 +6,10 @@ public enum SummaryFormat : byte
     Flat,        // JSON serialized object with flattened propertie
     Csv,         // Comma-separated values
 }
+
+public enum SummaryGrouping : byte
+{
+    None = 0,
+    Spread,
+    FiatPrice
+}

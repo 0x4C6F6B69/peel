@@ -18,17 +18,33 @@ public static class OfferSummaryExtension
             ReferenceId = summary.ReferenceId,
             PublishingDate = summary.PublishingDate,
             SpreadPc = summary.SpreadPc,
-            
+
             QuoteAmountSat = summary.Quote.AmountSat,
             QuoteAmountBtc = summary.Quote.AmountBtc,
             QuotePriceFiatBase = summary.Quote.PriceFiatBase,
             QuotePriceFiat = summary.Quote.PriceFiat,
-           
+
             QuoteMaxAmountSat = summary.QuoteMax?.AmountSat,
             QuoteMaxAmountBtc = summary.QuoteMax?.AmountBtc,
             QuoteMaxPriceFiatBase = summary.QuoteMax?.PriceFiatBase,
             QuoteMaxPriceFiat = summary.QuoteMax?.PriceFiat,
-            
+
             MeansOfPayment = JsonSerializer.Serialize(summary.MeansOfPayment, jsonOptions)
         };
+
+    public static IEnumerable<OfferSummaryBySpreadGroup> GroupBySpread(
+        this IEnumerable<OfferSummary> offers) => offers
+            .GroupBy(o => o.SpreadPc)
+            .Select(g => new OfferSummaryBySpreadGroup(
+                g.Key,
+                g.ToList()
+            ));
+
+    public static IEnumerable<OfferSummaryByPriceFiatGroup> GroupByPriceFiat(
+        this IEnumerable<OfferSummary> offers) => offers
+            .GroupBy(o => o.Quote.PriceFiat)
+            .Select(g => new OfferSummaryByPriceFiatGroup(
+                g.Key,
+                g.ToList()
+            ));
 }
