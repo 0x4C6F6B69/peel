@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-using PeachClient.Models;
-using Peel.Domain;
+﻿using Peel.Models;
 using SharpX;
 using SharpX.Extensions;
 using Xunit.Abstractions;
@@ -14,7 +12,7 @@ public class Domain_tests(ITestOutputHelper output)
         new OfferSearchCriteriaDefault
         {
             Type = CriteriaType.Default,
-            OfferType = Peel.Domain.OfferTypeFilter.All,
+            OfferType = Peel.Models.OfferTypeFilter.All,
             Amount = new OfferAmount(CurrencyType.Fiat, 100m, 1000m),
             MeansOfPayment = new() { ["EUR"] = ["sepa"] },
         },
@@ -39,9 +37,9 @@ public class Domain_tests(ITestOutputHelper output)
             new OfferSearchCriteriaDefault
             {
                 Type = CriteriaType.Default,
-                OfferType = Peel.Domain.OfferTypeFilter.Buy,
+                OfferType = Peel.Models.OfferTypeFilter.Buy,
                 Amount = new OfferAmount(CurrencyType.Fiat, 100m, 1000m),
-                MeansOfPayment = new() { ["EUR"] = ["sepa"] },
+                //MeansOfPayment = new() { ["EUR"] = ["sepa"] },
             },
             (summeries, btcUnitPrice) =>
             {

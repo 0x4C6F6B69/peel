@@ -1,17 +1,13 @@
-﻿using Peel.Configuration;
-using Peel.Domain;
-using Peel.Infrastructure;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
+﻿using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
-using Moq;
 using PeachClient;
-using Peel;
-using Peel.Market;
+using Peel.Configuration;
+using Peel.Infrastructure;
+using Peel.Services;
 
 internal static class Factory
 {
-    public static PeachFacade CreateFacade() => new PeachFacade(CreateClient(), new Mapper());
+    public static OfferReader CreateFacade() => new OfferReader(CreateClient(), new Mapper());
 
     public static PeachApiClient CreateClient() => new(NullLogger<PeachApiClient>.Instance,
         Options.Create(new PeachApiClientSettings { }));

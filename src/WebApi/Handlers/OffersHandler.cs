@@ -4,9 +4,10 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Peel.Configuration;
-using Peel.Domain;
 using Peel.Infrastructure;
-using Peel.Market;
+using Peel.Infrastructure.Types;
+using Peel.Models;
+using Peel.Services;
 using Peel.Web.Models;
 using SharpX;
 using SharpX.Extensions;
@@ -15,7 +16,7 @@ namespace Peel.Web.Handlers;
 
 public class OffersHandler(//ILogger<OffersHandler> logger,
     IOptions<SystemConfig> options,
-    PeachFacade facade,
+    OfferReader facade,
     MarketAnalyzer market)
 {
     private SystemConfig _config = options.Value;
