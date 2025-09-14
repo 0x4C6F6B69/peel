@@ -26,7 +26,7 @@ public abstract record class OfferSummaryBase
     public required string ReferenceId { get; init; }
     public required OfferSummaryType Type { get; init; }
     public DateTime? PublishingDate { get; set; }
-    public decimal? SpreadPc { get; set; }
+    public float? SpreadPc { get; set; }
 }
 
 public record class OfferSummary : OfferSummaryBase
