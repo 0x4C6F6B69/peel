@@ -32,8 +32,8 @@ public abstract record class OfferSearchCriteria : IValidatableObject
 {
     public required OfferTypeFilter OfferType { get; init; }
     public OfferAmount? Amount { get; set; }
-    public float? MinPremium { get; set; }
-    public float? MaxPremium { get; set; }
+    public float? MinSpread { get; set; }
+    public float? MaxSpread { get; set; }
     public double? MinReputation { get; set; }
     public required CriteriaType Type { get; init; }
 
@@ -41,9 +41,9 @@ public abstract record class OfferSearchCriteria : IValidatableObject
     {
         List<ValidationResult> validations = [];
 
-        if (MinPremium != null && MaxPremium != null && MinPremium > MaxPremium) {
-            validations.Add(new ValidationResult($"{nameof(MinPremium)} must be lesser than {nameof(MaxPremium)}",
-                [nameof(MinPremium), nameof(MaxPremium)]));
+        if (MinSpread != null && MaxSpread != null && MinSpread > MaxSpread) {
+            validations.Add(new ValidationResult($"{nameof(MinSpread)} must be lesser than {nameof(MaxSpread)}",
+                [nameof(MinSpread), nameof(MaxSpread)]));
         }
 
         // TODO: add a check on Amount when specifying a Buy offer (if Peach API does not change)
