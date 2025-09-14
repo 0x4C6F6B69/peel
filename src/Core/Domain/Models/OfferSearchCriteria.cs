@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace Peel.Domain;
@@ -27,16 +28,28 @@ public enum CriteriaType : byte
     Advanced
 }
 
-// [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
-// [JsonDerivedType(typeof(OfferSearchCriteriaDefault), "default")]
-// [JsonDerivedType(typeof(OfferSearchCriteriaAdvanced), "advanced")]
-public abstract record class OfferSearchCriteria
+public abstract record class OfferSearchCriteria : IValidatableObject
 {
     public required OfferTypeFilter OfferType { get; init; }
     public OfferAmount? Amount { get; set; }
-    public decimal? MaxPremium { get; set; }
+    public float? MinPremium { get; set; }
+    public float? MaxPremium { get; set; }
     public double? MinReputation { get; set; }
     public required CriteriaType Type { get; init; }
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        List<ValidationResult> validations = [];
+
+        if (MinPremium != null && MaxPremium != null && MinPremium > MaxPremium) {
+            validations.Add(new ValidationResult($"{nameof(MinPremium)} must be lesser than {nameof(MaxPremium)}",
+                [nameof(MinPremium), nameof(MaxPremium)]));
+        }
+
+        // TODO: add a check on Amount when specifying a Buy offer (if Peach API does not change)
+
+        return validations;
+    }
 }
 
 public record class OfferSearchCriteriaDefault : OfferSearchCriteria

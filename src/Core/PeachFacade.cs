@@ -50,6 +50,10 @@ public sealed class PeachFacade(PeachApiClient client,
             summaries = enforceAmountRangeFilter(filter, summaries);
         }
 
+        if (criteria.MinPremium != null) {
+            summaries = applyMinSpreadFilter(summaries, criteria.MinPremium);
+        }
+
         if (criteria.Type == CriteriaType.Advanced) {
             var flexCriteria = (OfferSearchCriteriaAdvanced)criteria;
             summaries = applyFlexibleCriteria(flexCriteria, summaries);
@@ -80,12 +84,21 @@ public sealed class PeachFacade(PeachApiClient client,
 
         // NOTE: it seems that the amount filter in Peach API does not work as expected
         static IEnumerable<OfferSummary> enforceAmountRangeFilter(OfferFilter filter,
-            IEnumerable< OfferSummary> summaries)
+            IEnumerable<OfferSummary> summaries)
         {
             var unwanted = summaries.Where(s =>
                 s.Type == OfferSummaryType.Buy &&
                 (s.Quote.AmountSat < filter.Amount!.ElementAt(0) || s.QuoteMax.AmountSat > filter.Amount!.ElementAt(1))
             );
+
+            return summaries.Except(unwanted);
+        }
+        
+        static IEnumerable<OfferSummary> applyMinSpreadFilter(IEnumerable<OfferSummary> summaries,
+            float? minSpread)
+        {
+            var unwanted = summaries.Where(s =>
+                s.SpreadPc != null && s.SpreadPc.Value < minSpread);
 
             return summaries.Except(unwanted);
         }

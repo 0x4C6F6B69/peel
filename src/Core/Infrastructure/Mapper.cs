@@ -22,7 +22,7 @@ public class Mapper
         OfferFilter filter = new()
         {
             Type = MapOfferTypeFilter(criteria.OfferType),
-            MaxPremium = criteria.MaxPremium,
+            MaxPremium = (decimal?)criteria.MaxPremium,
             MinReputation = criteria.MinReputation
         };
 
@@ -93,7 +93,7 @@ public class Mapper
             Quote = quote,
             QuoteMax = quoteMax,
             MeansOfPayment = offer.MeansOfPayment,
-            SpreadPc = offer.Premium
+            SpreadPc = (float?)offer.Premium
         };
     }
 
