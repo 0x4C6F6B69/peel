@@ -62,7 +62,7 @@ public class Mapper
         var amountBtc = Converter.SatoshiToBitcoin((long)offer.Amount.ElementAt(0));
         var basePrice = amountBtc * btcUnitPrice;
         var price = offer.Type == OfferType.Ask
-            ? Percent.Increase(basePrice, offer.Premium!.Value)
+            ? basePrice.Increase(offer.Premium!.Value)
             : basePrice;
         OfferQuote quote = new()
         {
