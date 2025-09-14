@@ -55,26 +55,3 @@ public static class Converter
         return (long)decimal.Floor(satsDec);
     }
 }
-
-public static class Percent
-{
-    public static float Increase(float value, float percent)
-    {
-        return value * (1f + percent / 100f);
-    }
-
-    public static float Decrease(float value, float percent)
-    {
-        return value * (1f - percent / 100f);
-    }
-
-    public static decimal Increase(decimal value, decimal percent)
-    {
-        return value * (1M + percent / 100M);
-    }
-
-    public static decimal Decrease(decimal value, decimal percent)
-    {
-        return value * (1M - percent / 100M);
-    }
-}
