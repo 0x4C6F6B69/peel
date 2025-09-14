@@ -6,7 +6,7 @@ using SharpX.Extensions;
 using Xunit.Abstractions;
 using Converter = Peel.Infrastructure.Converter;
 
-public class Domain_Tests(ITestOutputHelper output)
+public class Domain_tests(ITestOutputHelper output)
 {
 
     [Fact]
@@ -69,8 +69,9 @@ public class Domain_Tests(ITestOutputHelper output)
         OfferSearchCriteria criteria, Action<IEnumerable<OfferSummary>, decimal>? assert = null, bool failOnEmpty = false)
     {
         var facade = Factory.CreateFacade();
+        var market = Factory.CreateMarket();
 
-        var btcUnitPrice = (await facade.GetBtcMarketPriceAsync("EUR")).FromJustOrFail();
+        var btcUnitPrice = (await market.GetBtcMarketPriceAsync("EUR")).FromJustOrFail();
 
         output.WriteLine($"BTC price: {btcUnitPrice} EUR");
 

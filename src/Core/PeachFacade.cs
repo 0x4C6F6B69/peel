@@ -46,8 +46,9 @@ public sealed class PeachFacade(PeachApiClient client,
 
         var summaries = offers.Select(offer => mapper.MapOffer(offer, btcUnitPrice));
 
-        if (filter.Amount != null && filter.Amount.Count == 2) {
-            summaries = enforceAmountRangeFilter(filter, summaries);
+        if (criteria.Amount != null) {
+            summaries = enforceAmountRangeFilter(
+                criteria.Amount.AmountMin, criteria.Amount.AmountMax, summaries);
         }
 
         if (criteria.MinSpread != null) {
@@ -83,12 +84,12 @@ public sealed class PeachFacade(PeachApiClient client,
         }
 
         // NOTE: it seems that the amount filter in Peach API does not work as expected
-        static IEnumerable<OfferSummary> enforceAmountRangeFilter(OfferFilter filter,
+        static IEnumerable<OfferSummary> enforceAmountRangeFilter(decimal amountMin, decimal amountMax,
             IEnumerable<OfferSummary> summaries)
         {
             var unwanted = summaries.Where(s =>
                 s.Type == OfferSummaryType.Buy &&
-                (s.Quote.AmountSat < filter.Amount!.ElementAt(0) || s.QuoteMax.AmountSat > filter.Amount!.ElementAt(1))
+                (s.Quote.AmountSat < amountMin || s.QuoteMax.AmountSat > amountMax)
             );
 
             return summaries.Except(unwanted);
@@ -106,7 +107,4 @@ public sealed class PeachFacade(PeachApiClient client,
 
     public async Task<Maybe<OfferSummary>> GetOfferSummaryAsync(string id, decimal btcUnitPrice) =>
         (await client.GetOfferAsync(mapper.MapToOfferId(id))).Map(o => mapper.MapOffer(o, btcUnitPrice));
-
-    public async Task<Maybe<decimal>> GetBtcMarketPriceAsync(string fiat) =>
-        (await client.GetBtcMarketPriceAsync(fiat)).Map(p => p.Price);
 }
