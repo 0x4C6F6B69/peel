@@ -1,11 +1,11 @@
 ﻿using System.Globalization;
 using Peel.Configuration;
-using Peel.Domain;
+using Peel.Models;
 using Microsoft.Extensions.Options;
 using SharpX;
 using PeachClient;
 
-namespace Peel.Market;
+namespace Peel.Services;
 
 public class MarketAnalyzer(PeachApiClient peachClient,
     BinanceClient binanceClient)

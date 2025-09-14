@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace Peel.Domain;
+namespace Peel.Models;
 
 public enum OfferTypeFilter : byte
 {

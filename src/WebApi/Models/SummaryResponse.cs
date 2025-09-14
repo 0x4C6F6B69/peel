@@ -1,4 +1,4 @@
-﻿using Peel.Domain;
+﻿using Peel.Models;
 
 namespace Peel.Web.Models;
 

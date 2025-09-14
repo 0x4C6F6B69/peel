@@ -1,4 +1,4 @@
-﻿using Peel.Domain;
+﻿using Peel.Models;
 using Peel.Infrastructure;
 using SharpX;
 using SharpX.Extensions;
@@ -6,10 +6,11 @@ using PeachClient;
 using PeachClient.Models;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
+using Peel.Infrastructure.Types;
 
-namespace Peel;
+namespace Peel.Services;
 
-public sealed class PeachFacade(PeachApiClient client,
+public sealed class OfferReader(PeachApiClient client,
     Mapper mapper)
 {
     public async Task<Result<List<OfferSummary>>> GetOffersSummaryAsync(OfferSearchCriteria criteria,

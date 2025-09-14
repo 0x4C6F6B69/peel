@@ -1,7 +1,8 @@
-﻿using Peel.Domain;
+﻿using Peel;
 using PeachClient.Models;
 using System.Diagnostics;
 using SharpX;
+using Peel.Models;
 
 namespace Peel.Infrastructure;
 
@@ -9,11 +10,11 @@ public class Mapper
 {
     private const string SUMMARY_PREFIX = "ofs";
 
-    public PeachClient.Models.OfferTypeFilter MapOfferTypeFilter(Domain.OfferTypeFilter filterType) => filterType switch
+    public PeachClient.Models.OfferTypeFilter MapOfferTypeFilter(Peel.Models.OfferTypeFilter filterType) => filterType switch
     {
-        Domain.OfferTypeFilter.All => PeachClient.Models.OfferTypeFilter.All,
-        Domain.OfferTypeFilter.Sell => PeachClient.Models.OfferTypeFilter.Ask,
-        Domain.OfferTypeFilter.Buy => PeachClient.Models.OfferTypeFilter.Bid,
+        Peel.Models.OfferTypeFilter.All => PeachClient.Models.OfferTypeFilter.All,
+        Peel.Models.OfferTypeFilter.Sell => PeachClient.Models.OfferTypeFilter.Ask,
+        Peel.Models.OfferTypeFilter.Buy => PeachClient.Models.OfferTypeFilter.Bid,
         _ => throw new UnreachableException($"Unexpected value: {filterType}.")
     };
 

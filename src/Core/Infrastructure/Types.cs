@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace Peel.Domain;
+namespace Peel.Infrastructure.Types;
 
 public record struct ErrorInfo(string Message, Exception? Exception = null);
 

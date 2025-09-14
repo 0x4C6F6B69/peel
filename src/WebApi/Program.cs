@@ -1,12 +1,11 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using PeachClient;
 using Peel;
 using Peel.Configuration;
-using Peel.Domain;
 using Peel.Infrastructure;
-using Peel.Market;
+using Peel.Services;
 using Peel.Web.Handlers;
-using PeachClient;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,7 +39,7 @@ builder.Services.AddOptions<BinanceConfig>()
     .BindConfiguration(BinanceConfig.SectionName);
 
 builder.Services.AddSingleton<PeachApiClient>()
-    .AddSingleton<PeachFacade>();
+    .AddSingleton<OfferReader>();
 builder.Services.AddSingleton<BinanceClient>()
     .AddSingleton<MarketAnalyzer>();
 

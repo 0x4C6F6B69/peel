@@ -1,8 +1,9 @@
 ﻿using System.Net;
 using Microsoft.Extensions.Options;
 using Peel.Configuration;
-using Peel.Domain;
-using Peel.Market;
+using Peel.Infrastructure.Types;
+using Peel.Models;
+using Peel.Services;
 
 namespace Peel.Web.Handlers;
 

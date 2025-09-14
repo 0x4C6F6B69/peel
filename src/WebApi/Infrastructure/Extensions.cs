@@ -1,9 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
-using Peel.Domain;
-using Microsoft.Extensions.Logging;
+using Peel.Infrastructure.Types;
 using SharpX;
-using SharpX.Extensions;
 
 namespace Peel;
 
