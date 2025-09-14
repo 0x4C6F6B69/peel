@@ -2,7 +2,6 @@ using System.Net;
 
 namespace Peel.Domain;
 
-#region System
 public record struct ErrorInfo(string Message, Exception? Exception = null);
 
 /// <summary>ASP.NET pipeline default error mapping based on https://datatracker.ietf.org/doc/html/rfc7807</summary>
@@ -53,20 +52,19 @@ public sealed class ErrorResult
 
     public List<object> Errors { get; set; } = null!;
 }
-#endregion
 
-public record class VolatilityResponse(
-    VolatilityLevel Level,
-    double Score,
-    string DefaultFiat
-);
-
-public enum VolatilityLevel : byte
+public sealed class Result<T>
 {
-    Undefined = 0, // Used when calculation isn't possible or meaningful
-    VeryLow,       // Extremely stable price, minimal fluctuations
-    Low,           // Price relatively stable, small fluctuations
-    Medium,        // Moderate price fluctuations
-    High,          // Significant price fluctuations
-    Extreme        // Very large price swings, highly volatile
+    public T? Value { get; }
+    public List<string> Errors { get; }
+
+    public bool IsSuccess => Value != null && Errors.Count == 0;
+    public bool IsFailure => Value == null && Errors.Count > 0;
+    public bool IsPartial => Value != null && Errors.Count > 0;
+
+    public Result(T? value, List<string> errors)
+    {
+        Value = value;
+        Errors = errors ?? new List<string>();
+    }
 }
