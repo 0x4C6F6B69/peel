@@ -2,14 +2,23 @@
 
 namespace Peel.Web.Models;
 
-public class SummaryResponse<TSummary>
-    where TSummary : OfferSummaryBase
+public abstract class SummaryResponseBase
 {
-    public required List<TSummary> Summaries { get; init; }
-
     public List<string>? Errors { get; init; }
 
     public required string DefaultFiat { get; init; }
 
     public required decimal BtcUnitPrice { get; init; }
+}
+
+public class SummaryResponse<TSummary> : SummaryResponseBase
+    where TSummary : OfferSummaryBase
+{
+    public required List<TSummary> Summaries { get; init; }
+}
+
+public class SummaryGroupResponse<TGroup> : SummaryResponseBase
+    where TGroup : OfferSummaryGroup
+{
+    public required List<TGroup> Groups { get; init; }
 }
