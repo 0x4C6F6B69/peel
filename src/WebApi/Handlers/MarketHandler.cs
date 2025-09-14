@@ -1,13 +1,10 @@
 ﻿using System.Net;
 using Microsoft.Extensions.Options;
-using Peel;
 using Peel.Configuration;
 using Peel.Domain;
-using Peel.Infrastructure;
 using Peel.Market;
-using SharpX;
 
-namespace Peel.Handlers;
+namespace Peel.Web.Handlers;
 
 public static class MarketHandler
 {

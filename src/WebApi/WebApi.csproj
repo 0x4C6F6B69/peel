@@ -9,7 +9,7 @@
     <Version>0.1.0</Version>
     <Title>Peel Web API</Title>
     <Authors>0x4C6F6B69</Authors>
-    <RootNamespace>Peel</RootNamespace>
+    <RootNamespace>Peel.Web</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

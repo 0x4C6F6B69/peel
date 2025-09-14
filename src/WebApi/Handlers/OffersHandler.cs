@@ -1,19 +1,16 @@
 ﻿using System.Diagnostics;
 using System.Net;
-using System.Net.NetworkInformation;
 using System.Text.Json;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Peel;
 using Peel.Configuration;
 using Peel.Domain;
 using Peel.Infrastructure;
-using Peel.Models;
+using Peel.Web.Models;
 using SharpX;
 using SharpX.Extensions;
 
-namespace Peel.Handlers;
+namespace Peel.Web.Handlers;
 
 public class OffersHandler(//ILogger<OffersHandler> logger,
     IOptions<SystemConfig> options,
