@@ -50,8 +50,8 @@ public sealed class PeachFacade(PeachApiClient client,
             summaries = enforceAmountRangeFilter(filter, summaries);
         }
 
-        if (criteria.MinPremium != null) {
-            summaries = applyMinSpreadFilter(summaries, criteria.MinPremium);
+        if (criteria.MinSpread != null) {
+            summaries = applyMinSpreadFilter(summaries, criteria.MinSpread);
         }
 
         if (criteria.Type == CriteriaType.Advanced) {

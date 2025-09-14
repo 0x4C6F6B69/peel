@@ -22,7 +22,7 @@ public class Mapper
         OfferFilter filter = new()
         {
             Type = MapOfferTypeFilter(criteria.OfferType),
-            MaxPremium = (decimal?)criteria.MaxPremium,
+            MaxPremium = (decimal?)criteria.MaxSpread,
             MinReputation = criteria.MinReputation
         };
 
