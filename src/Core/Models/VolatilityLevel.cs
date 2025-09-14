@@ -1,4 +1,4 @@
-namespace Peel.Domain;
+namespace Peel.Models;
 
 public enum VolatilityLevel : byte
 {

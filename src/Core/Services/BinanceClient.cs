@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RestSharp;
 
-namespace Peel.Market;
+namespace Peel.Services;
 
 public sealed class BinanceClient
 {
