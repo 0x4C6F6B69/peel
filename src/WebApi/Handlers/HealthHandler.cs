@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
 using SharpX;
 
-namespace Peel.Handlers;
+namespace Peel.Web.Handlers;
 
 public static class HealthHandler
 {

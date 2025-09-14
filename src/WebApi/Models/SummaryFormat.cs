@@ -1,4 +1,4 @@
-﻿namespace Peel.Models;
+﻿namespace Peel.Web.Models;
 
 public enum SummaryFormat : byte
 {

@@ -5,7 +5,7 @@ using Peel.Configuration;
 using Peel.Domain;
 using Peel.Infrastructure;
 using Peel.Market;
-using Peel.Handlers;
+using Peel.Web.Handlers;
 using PeachClient;
 
 var builder = WebApplication.CreateBuilder(args);
