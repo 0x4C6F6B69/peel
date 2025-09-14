@@ -1,6 +1,6 @@
 using Peel.Domain;
 
-namespace Peel.Models;
+namespace Peel.Web.Models;
 
 public record class VolatilityResponse(
     VolatilityLevel Level,

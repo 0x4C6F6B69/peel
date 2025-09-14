@@ -1,6 +1,6 @@
 ﻿using Peel.Domain;
 
-namespace Peel.Models;
+namespace Peel.Web.Models;
 
 public class SummaryResponse<TSummary>
     where TSummary : OfferSummaryBase
