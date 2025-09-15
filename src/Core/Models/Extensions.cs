@@ -41,10 +41,18 @@ public static class OfferSummaryExtension
             ));
 
     public static IEnumerable<OfferSummaryByPriceFiatGroup> GroupByPriceFiat(
-        this IEnumerable<OfferSummary> offers) => offers
-            .GroupBy(o => o.Quote.PriceFiat)
+        this IEnumerable<OfferSummary> offers, int slice)
+    {
+        return offers
+            .GroupBy(o =>
+            {
+                var bucketStart = (int)(Math.Floor(o.Quote.PriceFiat / slice) * slice);
+                var bucketEnd = bucketStart + slice - 1;
+                return $"{bucketStart}~{bucketEnd}";
+            })
             .Select(g => new OfferSummaryByPriceFiatGroup(
                 g.Key,
                 g.ToList()
             ));
+    }
 }
