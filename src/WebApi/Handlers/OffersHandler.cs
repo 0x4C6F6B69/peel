@@ -32,6 +32,9 @@ public class OffersHandler(//ILogger<OffersHandler> logger,
             [FromQuery] SummaryGrouping groupBy = SummaryGrouping.None,
             CancellationToken cancellationToken = default)
     {
+        // TODO: move this value to config
+        const int DEFAULT_RANGE_SLICE = 50;
+
         if (groupBy != SummaryGrouping.None && format != SummaryFormat.Default) {
             return Results.ValidationProblem(
                 new Dictionary<string, string[]> { { nameof(groupBy), ["Grouping is only allowed with default JSON response"] } },
@@ -66,7 +69,7 @@ public class OffersHandler(//ILogger<OffersHandler> logger,
                 }),
                 SummaryGrouping.FiatPrice => Results.Ok(new SummaryGroupResponse<OfferSummaryByPriceFiatGroup>()
                 {
-                    Groups = [.. (result.Value ?? []).GroupByPriceFiat()],
+                    Groups = [.. (result.Value ?? []).GroupByPriceFiat(DEFAULT_RANGE_SLICE)],
                     Errors = errors,
                     DefaultFiat = _config.DefaultFiat,
                     BtcUnitPrice = btcUnitPrice.Value

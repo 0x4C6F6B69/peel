@@ -10,7 +10,6 @@ public record class OfferSummaryBySpreadGroup(
 ) : OfferSummaryGroup(Summaries);
 
 public record class OfferSummaryByPriceFiatGroup(
-    decimal PriceFiat,
+    string PriceFiatRange,
     List<OfferSummary> Summaries
 ) : OfferSummaryGroup(Summaries);
-
