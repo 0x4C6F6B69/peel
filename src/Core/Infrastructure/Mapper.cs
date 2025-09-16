@@ -8,7 +8,7 @@ namespace Peel.Infrastructure;
 
 public class Mapper
 {
-    private const string SUMMARY_PREFIX = "ofs";
+    private const string SUMMARY_PREFIX = "smo-";
 
     public PeachClient.Models.OfferTypeFilter MapOfferTypeFilter(Peel.Models.OfferTypeFilter filterType) => filterType switch
     {
