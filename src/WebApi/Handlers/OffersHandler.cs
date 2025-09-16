@@ -45,7 +45,7 @@ public class OffersHandler(//ILogger<OffersHandler> logger,
 
         if (!Enum.TryParse<SummaryGroupBy>(groupByField, ignoreCase: true, out var groupBy)) {
             return Results.ValidationProblem(
-                new Dictionary<string, string[]> { { "groupBy", [$"Group by '{groupBy}' is not allowed."] } },
+                new Dictionary<string, string[]> { { "groupBy", [$"Group by '{groupByField}' is not allowed."] } },
                 statusCode: (int)HttpStatusCode.BadRequest
             );
         }
