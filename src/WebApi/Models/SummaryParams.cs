@@ -7,7 +7,7 @@ public enum SummaryFormat : byte
     Csv,         // Comma-separated values
 }
 
-public enum SummaryGrouping : byte
+public enum SummaryGroupBy : byte
 {
     None = 0,
     Spread,

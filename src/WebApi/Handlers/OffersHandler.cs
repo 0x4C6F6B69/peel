@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Linq.Expressions;
 using System.Net;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
@@ -28,16 +29,30 @@ public class OffersHandler(//ILogger<OffersHandler> logger,
     };
 
     public async Task<IResult> GetOffersSummaryAsync(OfferSearchCriteria filter,
-            [FromQuery] SummaryFormat format = SummaryFormat.Default,
-            [FromQuery] SummaryGrouping groupBy = SummaryGrouping.None,
+            [FromQuery(Name = "format")] string? outputFormat = nameof(SummaryFormat.Default),
+            [FromQuery(Name = "groupBy")] string? groupByField = nameof(SummaryGroupBy.None),
             CancellationToken cancellationToken = default)
     {
         // TODO: move this value to config
         const int DEFAULT_RANGE_SLICE = 50;
 
-        if (groupBy != SummaryGrouping.None && format != SummaryFormat.Default) {
+        if (!Enum.TryParse<SummaryFormat>(outputFormat, ignoreCase: true, out var format)) {
             return Results.ValidationProblem(
-                new Dictionary<string, string[]> { { nameof(groupBy), ["Grouping is only allowed with default JSON response"] } },
+                new Dictionary<string, string[]> { { "format", [$"Format '{outputFormat}' is not allowed."] } },
+                statusCode: (int)HttpStatusCode.BadRequest
+            );
+        }
+
+        if (!Enum.TryParse<SummaryGroupBy>(groupByField, ignoreCase: true, out var groupBy)) {
+            return Results.ValidationProblem(
+                new Dictionary<string, string[]> { { "groupBy", [$"Group by '{groupBy}' is not allowed."] } },
+                statusCode: (int)HttpStatusCode.BadRequest
+            );
+        }
+
+        if (groupBy != SummaryGroupBy.None && format != SummaryFormat.Default) {
+            return Results.ValidationProblem(
+                new Dictionary<string, string[]> { { "groupBy", ["Grouping is only allowed with default JSON response."] } },
                 statusCode: (int)HttpStatusCode.BadRequest
             );
         }
@@ -57,17 +72,17 @@ public class OffersHandler(//ILogger<OffersHandler> logger,
             });
         }
 
-        if (groupBy != SummaryGrouping.None) {
+        if (groupBy != SummaryGroupBy.None) {
             return groupBy switch
             {
-                SummaryGrouping.Spread => Results.Ok(new SummaryGroupResponse<OfferSummaryBySpreadGroup>()
+                SummaryGroupBy.Spread => Results.Ok(new SummaryGroupResponse<OfferSummaryBySpreadGroup>()
                 {
                     Groups = [.. (result.Value ?? []).GroupBySpread()],
                     Errors = errors,
                     DefaultFiat = _config.DefaultFiat,
                     BtcUnitPrice = btcUnitPrice.Value
                 }),
-                SummaryGrouping.FiatPrice => Results.Ok(new SummaryGroupResponse<OfferSummaryByPriceFiatGroup>()
+                SummaryGroupBy.FiatPrice => Results.Ok(new SummaryGroupResponse<OfferSummaryByPriceFiatGroup>()
                 {
                     Groups = [.. (result.Value ?? []).GroupByPriceFiat(DEFAULT_RANGE_SLICE)],
                     Errors = errors,
