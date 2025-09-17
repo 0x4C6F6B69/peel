@@ -38,7 +38,8 @@ public static class OfferSummaryExtension
             .Select(g => new OfferSummaryBySpreadGroup(
                 g.Key,
                 g.ToList()
-            ));
+            ))
+            .OrderBy(g => g.SpreadPc);
 
     public static IEnumerable<OfferSummaryByPriceFiatGroup> GroupByPriceFiat(
         this IEnumerable<OfferSummary> offers, int slice)
@@ -53,6 +54,7 @@ public static class OfferSummaryExtension
             .Select(g => new OfferSummaryByPriceFiatGroup(
                 g.Key,
                 g.ToList()
-            ));
+            ))
+            .OrderBy(g => Int32.Parse(g.PriceFiatRange.Split('~')[0]));
     }
 }
