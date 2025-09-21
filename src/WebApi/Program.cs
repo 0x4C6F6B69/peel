@@ -23,6 +23,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.UseAllOfToExtendReferenceSchemas();
+    //c.UseInlineDefinitionsForEnums();
+    c.SchemaFilter<EnumSchemaFilter>();
 });
 
 builder.Services.AddHealthChecks()
