@@ -28,12 +28,20 @@ public class Mapper
         };
 
         if (criteria.Amount != null) {
-            var satsMin = criteria.Amount.Currency == CurrencyType.Btc
-                ? Converter.BitcoinToSatoshi(criteria.Amount.AmountMin / btcUnitPrice)
-                : Converter.FiatToSatoshi(criteria.Amount.AmountMin, btcUnitPrice);
-            var satsMax = criteria.Amount.Currency == CurrencyType.Btc
-                ? Converter.BitcoinToSatoshi(criteria.Amount.AmountMax / btcUnitPrice)
-                : Converter.FiatToSatoshi(criteria.Amount.AmountMax, btcUnitPrice);
+            var satsMin = criteria.Amount.Currency switch
+            {
+                CurrencyType.Sat  => (long)criteria.Amount.AmountMin,
+                CurrencyType.Btc  => Converter.BitcoinToSatoshi(criteria.Amount.AmountMin / btcUnitPrice),
+                CurrencyType.Fiat => Converter.FiatToSatoshi(criteria.Amount.AmountMin, btcUnitPrice),
+                _                 => throw new UnreachableException($"Unexpected type {criteria.Type}.")
+            };
+            var satsMax = criteria.Amount.Currency switch
+            {
+                CurrencyType.Sat  => (long)criteria.Amount.AmountMax,
+                CurrencyType.Btc  => Converter.BitcoinToSatoshi(criteria.Amount.AmountMax / btcUnitPrice),
+                CurrencyType.Fiat => Converter.FiatToSatoshi(criteria.Amount.AmountMax, btcUnitPrice),
+                _                 => throw new UnreachableException($"Unexpected type {criteria.Type}.")
+            };
             filter.Amount = [satsMin, satsMax];
         }
 

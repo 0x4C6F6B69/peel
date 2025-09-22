@@ -7,13 +7,14 @@ public enum OfferTypeFilter : byte
 {
     All = 0,
     Sell,
-    Buy
+    Buy,
 }
 
 public enum CurrencyType : byte
 {
-    Btc = 0,
-    Fiat
+    Sat = 0,
+    Btc,
+    Fiat,
 }
 
 public record class OfferAmount(
