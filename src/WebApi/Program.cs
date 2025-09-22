@@ -25,6 +25,7 @@ builder.Services.AddSwaggerGen(c =>
     c.UseAllOfToExtendReferenceSchemas();
     //c.UseInlineDefinitionsForEnums();
     c.SchemaFilter<EnumSchemaFilter>();
+    c.SchemaFilter<DecimalSchemaFilter>();
 });
 
 builder.Services.AddHealthChecks()
