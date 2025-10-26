@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Text.Json.Serialization;
+using Peel.Infrastructure;
 
 namespace Peel.Models;
 
@@ -21,7 +23,22 @@ public record class OfferAmount(
     CurrencyType Currency,
     decimal AmountMin,
     decimal AmountMax
-);
+)
+{
+    public decimal GetMinInSatoshi(decimal btcUnitPrice) => Currency switch {
+        CurrencyType.Sat  => AmountMin,
+        CurrencyType.Btc  => Converter.BitcoinToSatoshi(AmountMin / btcUnitPrice),
+        CurrencyType.Fiat => Converter.FiatToSatoshi(AmountMin, btcUnitPrice),
+        _                 => throw new UnreachableException($"Unexpected type {Currency}.")
+    };
+
+    public decimal GetMaxInSatoshi(decimal btcUnitPrice) => Currency switch {
+        CurrencyType.Sat  => AmountMax,
+        CurrencyType.Btc  => Converter.BitcoinToSatoshi(AmountMax / btcUnitPrice),
+        CurrencyType.Fiat => Converter.FiatToSatoshi(AmountMax, btcUnitPrice),
+        _                 => throw new UnreachableException($"Unexpected type {Currency}.")
+    };
+};
 
 public enum CriteriaType : byte
 {

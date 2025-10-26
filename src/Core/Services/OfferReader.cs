@@ -59,7 +59,8 @@ public sealed class OfferReader(PeachApiClient client,
             var filteredOffers = offers;
             if (criteria.Amount != null) {
                 filteredOffers = filteredOffers.Where(
-                    o => o.Amount >= criteria.Amount.AmountMin && o.Amount <= criteria.Amount.AmountMax);
+                    o => o.Amount >= criteria.Amount.GetMinInSatoshi(btcUnitPrice) &&
+                         o.Amount <= criteria.Amount.GetMaxInSatoshi(btcUnitPrice));
             }
             if (criteria.MinSpread != null) {
                 filteredOffers = filteredOffers.Where(o => o.Premium >= (decimal)criteria.MinSpread.Value);
@@ -109,7 +110,7 @@ public sealed class OfferReader(PeachApiClient client,
 
             // Since Peach API does not provide a mean to get all offers we neeed to merge results
             return new CombinedResponse(
-                sellResponse.Offers.Concat(buyResponse.Offers).ToList(),
+                filter(sellResponse.Offers.Concat(buyResponse.Offers)).ToList(),
                 sellResponse.Total + buyResponse.Total,
                 SellExhausted: sellResponse.Remaining == 0,
                 BuyExhausted: buyResponse.Remaining == 0);
