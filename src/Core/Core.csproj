@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <LangVersion>13</LangVersion>
     <AssemblyName>Peel.Core</AssemblyName>
-    <Version>0.1.0</Version>
+    <Version>0.1.0-preview.199</Version>
     <Title>Peel Core</Title>
     <Authors>0x4C6F6B69</Authors>
     <RootNamespace>Peel</RootNamespace>
@@ -16,7 +16,7 @@
     <PackageReference Include="CsvHelper" Version="33.1.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.4" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.4" />
-    <PackageReference Include="PeachClient" Version="0.1.4-preview" />
+    <PackageReference Include="PeachClient" Version="0.2.1-preview.223" />
     <PackageReference Include="RestSharp" Version="112.1.0" />
     <PackageReference Include="SharpX" Version="8.3.6" />
   </ItemGroup>
@@ -26,5 +26,18 @@
       <_Parameter1>Tests</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
+
+  <Target Name="UpdateBuildNumber" BeforeTargets="BeforeBuild">
+    <PropertyGroup>
+      <PowerShellExe>powershell</PowerShellExe>
+      <BuildScript>$(MSBuildProjectDirectory)\..\..\scripts\incrementBuild.ps1</BuildScript>
+    </PropertyGroup>
+
+    <Message Text="Running build number update..." Importance="high" />
+    <Message Text="Script: $(BuildScript)" Importance="high" />
+    <Message Text="Target: $(MSBuildProjectFullPath)" Importance="high" />
+
+    <Exec Command="&quot;$(PowerShellExe)&quot; -NoProfile -ExecutionPolicy Bypass -File &quot;$(BuildScript)&quot; &quot;$(MSBuildProjectFullPath)&quot;" WorkingDirectory="$(MSBuildProjectDirectory)\..\.." />
+  </Target>
 
 </Project>
