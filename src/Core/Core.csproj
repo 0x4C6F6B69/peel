@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <LangVersion>13</LangVersion>
     <AssemblyName>Peel.Core</AssemblyName>
-    <Version>0.1.0-preview.199</Version>
+    <Version>0.1.0-preview.203</Version>
     <Title>Peel Core</Title>
     <Authors>0x4C6F6B69</Authors>
     <RootNamespace>Peel</RootNamespace>

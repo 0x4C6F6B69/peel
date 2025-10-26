@@ -51,6 +51,11 @@ public abstract record class OfferSearchCriteria : IValidatableObject
 
         return validations;
     }
+
+    internal bool HasSellFilter() => OfferType == OfferTypeFilter.Sell;
+    internal bool HasBuyFilter() => OfferType == OfferTypeFilter.Buy;
+    internal bool HasAllFilter() => OfferType == OfferTypeFilter.All;
+
 }
 
 public record class OfferSearchCriteriaDefault : OfferSearchCriteria

@@ -10,54 +10,54 @@ public class Mapper
 {
     private const string SUMMARY_PREFIX = "smo-";
 
-    public PeachClient.Models.OfferTypeFilter MapOfferTypeFilter(Peel.Models.OfferTypeFilter filterType) => filterType switch
-    {
-        Peel.Models.OfferTypeFilter.All => PeachClient.Models.OfferTypeFilter.All,
-        Peel.Models.OfferTypeFilter.Sell => PeachClient.Models.OfferTypeFilter.Ask,
-        Peel.Models.OfferTypeFilter.Buy => PeachClient.Models.OfferTypeFilter.Bid,
-        _ => throw new UnreachableException($"Unexpected value: {filterType}.")
-    };
+    //public PeachClient.Models.OfferTypeFilter MapOfferTypeFilter(Peel.Models.OfferTypeFilter filterType) => filterType switch
+    //{
+    //    Peel.Models.OfferTypeFilter.All => PeachClient.Models.OfferTypeFilter.All,
+    //    Peel.Models.OfferTypeFilter.Sell => PeachClient.Models.OfferTypeFilter.Ask,
+    //    Peel.Models.OfferTypeFilter.Buy => PeachClient.Models.OfferTypeFilter.Bid,
+    //    _ => throw new UnreachableException($"Unexpected value: {filterType}.")
+    //};
 
-    public OfferFilter MapOfferFilter(OfferSearchCriteria criteria, decimal btcUnitPrice)
-    {
-        OfferFilter filter = new()
-        {
-            Type = MapOfferTypeFilter(criteria.OfferType),
-            MaxPremium = (decimal?)criteria.MaxSpread,
-            MinReputation = criteria.MinReputation
-        };
+    //public OfferFilter MapOfferFilter(OfferSearchCriteria criteria, decimal btcUnitPrice)
+    //{
+    //    OfferFilter filter = new()
+    //    {
+    //        Type = MapOfferTypeFilter(criteria.OfferType),
+    //        MaxPremium = (decimal?)criteria.MaxSpread,
+    //        MinReputation = criteria.MinReputation
+    //    };
 
-        if (criteria.Amount != null) {
-            var satsMin = criteria.Amount.Currency switch
-            {
-                CurrencyType.Sat  => (long)criteria.Amount.AmountMin,
-                CurrencyType.Btc  => Converter.BitcoinToSatoshi(criteria.Amount.AmountMin / btcUnitPrice),
-                CurrencyType.Fiat => Converter.FiatToSatoshi(criteria.Amount.AmountMin, btcUnitPrice),
-                _                 => throw new UnreachableException($"Unexpected type {criteria.Type}.")
-            };
-            var satsMax = criteria.Amount.Currency switch
-            {
-                CurrencyType.Sat  => (long)criteria.Amount.AmountMax,
-                CurrencyType.Btc  => Converter.BitcoinToSatoshi(criteria.Amount.AmountMax / btcUnitPrice),
-                CurrencyType.Fiat => Converter.FiatToSatoshi(criteria.Amount.AmountMax, btcUnitPrice),
-                _                 => throw new UnreachableException($"Unexpected type {criteria.Type}.")
-            };
-            filter.Amount = [satsMin, satsMax];
-        }
+    //    if (criteria.Amount != null) {
+    //        var satsMin = criteria.Amount.Currency switch
+    //        {
+    //            CurrencyType.Sat  => (long)criteria.Amount.AmountMin,
+    //            CurrencyType.Btc  => Converter.BitcoinToSatoshi(criteria.Amount.AmountMin / btcUnitPrice),
+    //            CurrencyType.Fiat => Converter.FiatToSatoshi(criteria.Amount.AmountMin, btcUnitPrice),
+    //            _                 => throw new UnreachableException($"Unexpected type {criteria.Type}.")
+    //        };
+    //        var satsMax = criteria.Amount.Currency switch
+    //        {
+    //            CurrencyType.Sat  => (long)criteria.Amount.AmountMax,
+    //            CurrencyType.Btc  => Converter.BitcoinToSatoshi(criteria.Amount.AmountMax / btcUnitPrice),
+    //            CurrencyType.Fiat => Converter.FiatToSatoshi(criteria.Amount.AmountMax, btcUnitPrice),
+    //            _                 => throw new UnreachableException($"Unexpected type {criteria.Type}.")
+    //        };
+    //        filter.Amount = [satsMin, satsMax];
+    //    }
 
-        switch (criteria.Type) {
-            case CriteriaType.Default:
-                var defaultCriteria = (OfferSearchCriteriaDefault)criteria;
-                filter.MeansOfPayment = defaultCriteria.MeansOfPayment;
-                break;
-            case CriteriaType.Advanced:
-                break;
-            default:
-                throw new UnreachableException($"Unexpected type {criteria.Type}.");
-        }
+    //    switch (criteria.Type) {
+    //        case CriteriaType.Default:
+    //            var defaultCriteria = (OfferSearchCriteriaDefault)criteria;
+    //            filter.MeansOfPayment = defaultCriteria.MeansOfPayment;
+    //            break;
+    //        case CriteriaType.Advanced:
+    //            break;
+    //        default:
+    //            throw new UnreachableException($"Unexpected type {criteria.Type}.");
+    //    }
 
-        return filter;
-    }
+    //    return filter;
+    //}
 
     public OfferSummaryType MapOfferType(OfferType type) => type switch
     {
@@ -106,13 +106,13 @@ public class Mapper
         };
     }
 
-    public string MapToSummaryId(string offerId) => $"{SUMMARY_PREFIX}{offerId}";
+    public string MapToSummaryId(long offerId) => $"{SUMMARY_PREFIX}{offerId}";
 
-    public string MapToOfferId(string summaryId)
+    public long MapToOfferId(string summaryId)
     {
         if (!summaryId.StartsWith(SUMMARY_PREFIX))
             throw new FormatException($"Summary ID must start with '{SUMMARY_PREFIX}'.");
 
-        return summaryId.Substring(SUMMARY_PREFIX.Length);
+        return Convert.ToInt64(summaryId.Substring(SUMMARY_PREFIX.Length));
     }
 }

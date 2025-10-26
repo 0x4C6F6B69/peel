@@ -21,21 +21,20 @@ public sealed class OfferReader(PeachApiClient client,
         const int MAX_FAILS = 5;
         const int COOLDOWN_MS = 150;
 
-        var filter = mapper.MapOfferFilter(criteria, btcUnitPrice);
-
         List<Offer> offers = [];
         List<string> errors = [];
         var pageNum = 0;
-        while (true) {
-            var result = await client.SearchOffersAsync(filter,
-                new OfferPagination(pageNum, PAGE_SIZE), OfferSortBy.LowestPremium);
-            if (result.MatchJust(out var response)) {
+        var sellExhausted = false;
+        var buyExhausted = false;
+
+        while (!sellExhausted || !buyExhausted) {
+            var response = await SearchOffersAsync(pageNum);
+            if (response != null) {
                 if (!response.Offers.IsEmpty()) {
                     offers.AddRange(response.Offers);
                 }
-                if (response.Remaining == 0) {
-                    break;
-                }
+                sellExhausted = response.SellExhausted;
+                buyExhausted = response.BuyExhausted;
             }
             else {
                 errors.Add($"Unable to get page number {pageNum}");
@@ -62,6 +61,55 @@ public sealed class OfferReader(PeachApiClient client,
         }
 
         return new Result<List<OfferSummary>>([.. summaries], errors);
+
+
+        async Task<CombinedResponse?> SearchOffersAsync(int pageNum)
+        {
+            OfferResponse? sellResponse = null;
+            if (criteria.HasSellFilter() || criteria.HasAllFilter()) {
+                sellResponse = await client.SearchOffersAsync(
+                    PeachClient.Models.OfferTypeFilter.Sell, new OfferPagination(pageNum, PAGE_SIZE), OfferSortBy.LowestPremium);
+                if (criteria.HasSellFilter()) return ToCombinedResponse(sellResponse, isSell: true);
+            }
+
+            OfferResponse? buyResponse = null;
+            if (criteria.HasBuyFilter() || criteria.HasAllFilter()) {
+                buyResponse = await client.SearchOffersAsync(
+                    PeachClient.Models.OfferTypeFilter.Buy, new OfferPagination(pageNum, PAGE_SIZE), OfferSortBy.LowestPremium);
+                if (criteria.HasBuyFilter()) return ToCombinedResponse(buyResponse, isSell: false);
+            }
+
+            if (sellResponse == null &&  buyResponse == null) {
+                errors.Add("Failed to get both sell and buy offers");
+                return null;
+            }
+
+            // If both kind are requested and one is null than we return the other
+            if (sellResponse == null) {
+                errors.Add("Failed to get sell offers");
+                return ToCombinedResponse(buyResponse, isSell: false); ;
+            }
+            if (buyResponse == null) {
+                errors.Add("Failed to get buy offers");
+                return ToCombinedResponse(sellResponse, isSell: true); ;
+            }
+
+            // Since Peach API does not provide a mean to get all offers we neeed to merge results
+            return new CombinedResponse(
+                sellResponse.Offers.Concat(buyResponse.Offers).ToList(),
+                sellResponse.Total + buyResponse.Total,
+                SellExhausted: sellResponse.Remaining == 0,
+                BuyExhausted: buyResponse.Remaining == 0);
+
+            static CombinedResponse? ToCombinedResponse(OfferResponse? resp, bool isSell)
+            {
+                if (resp == null) return null;
+
+                return new(resp.Offers, resp.Total,
+                    SellExhausted: isSell ? resp.Remaining == 0 : true,
+                    BuyExhausted: !isSell ? resp.Remaining == 0 : true);
+            }
+        }
 
         static IEnumerable<OfferSummary> applyFlexibleCriteria(OfferSearchCriteriaAdvanced flexCriteria,
             IEnumerable<OfferSummary> summaries)

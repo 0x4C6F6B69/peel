@@ -23,7 +23,8 @@ public enum OfferSummaryType
 public abstract record class OfferSummaryBase
 {
     public required string Id { get; init; }
-    public required string ReferenceId { get; init; }
+    // Original Peach offer ID
+    public required long ReferenceId { get; init; }
     public required OfferSummaryType Type { get; init; }
     public DateTime? PublishingDate { get; set; }
     public float? SpreadPc { get; set; }

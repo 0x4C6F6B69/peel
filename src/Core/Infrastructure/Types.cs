@@ -1,4 +1,5 @@
 using System.Net;
+using PeachClient.Models;
 
 namespace Peel.Infrastructure.Types;
 
@@ -68,3 +69,10 @@ public sealed class Result<T>
         Errors = errors ?? new List<string>();
     }
 }
+
+internal record CombinedResponse(
+    List<Offer> Offers,
+    int Total,
+    bool SellExhausted,
+    bool BuyExhausted
+);
