@@ -28,7 +28,7 @@ public sealed class OfferReader(PeachApiClient client,
         var buyExhausted = false;
 
         while (!sellExhausted || !buyExhausted) {
-            var response = await SearchOffersAsync(pageNum);
+            var response = await SearchOffersAsync(pageNum, applyAllFitlers);
             if (response != null) {
                 if (!response.Offers.IsEmpty()) {
                     offers.AddRange(response.Offers);
@@ -46,15 +46,6 @@ public sealed class OfferReader(PeachApiClient client,
 
         var summaries = offers.Select(offer => mapper.MapOffer(offer, btcUnitPrice));
 
-        if (criteria.Amount != null) {
-            summaries = enforceAmountRangeFilter(
-                criteria.Amount.AmountMin, criteria.Amount.AmountMax, summaries);
-        }
-
-        if (criteria.MinSpread != null) {
-            summaries = applyMinSpreadFilter(summaries, criteria.MinSpread);
-        }
-
         if (criteria.Type == CriteriaType.Advanced) {
             var flexCriteria = (OfferSearchCriteriaAdvanced)criteria;
             summaries = applyFlexibleCriteria(flexCriteria, summaries);
@@ -62,8 +53,30 @@ public sealed class OfferReader(PeachApiClient client,
 
         return new Result<List<OfferSummary>>([.. summaries], errors);
 
+        // Last Peach API update does not support filters, so we need to apply here
+        IEnumerable<Offer> applyAllFitlers(IEnumerable<Offer> offers)
+        {
+            var filteredOffers = offers;
+            if (criteria.Amount != null) {
+                filteredOffers = filteredOffers.Where(
+                    o => o.Amount >= criteria.Amount.AmountMin && o.Amount <= criteria.Amount.AmountMax);
+            }
+            if (criteria.MinSpread != null) {
+                filteredOffers = filteredOffers.Where(o => o.Premium >= (decimal)criteria.MinSpread.Value);
+            }
+            if (criteria.MaxSpread != null) {
+                filteredOffers = filteredOffers.Where(o => o.Premium <= (decimal)criteria.MaxSpread.Value);
+            }
+            if (criteria.MinReputation != null) {
+                filteredOffers = filteredOffers.Where(o => o.User.UserRating >= criteria.MinReputation.Value);
+            }
 
-        async Task<CombinedResponse?> SearchOffersAsync(int pageNum)
+            return filteredOffers;
+        }
+         
+
+        async Task<CombinedResponse?> SearchOffersAsync(int pageNum,
+            Func<IEnumerable<Offer>, IEnumerable<Offer>> filter)
         {
             OfferResponse? sellResponse = null;
             if (criteria.HasSellFilter() || criteria.HasAllFilter()) {
@@ -101,11 +114,11 @@ public sealed class OfferReader(PeachApiClient client,
                 SellExhausted: sellResponse.Remaining == 0,
                 BuyExhausted: buyResponse.Remaining == 0);
 
-            static CombinedResponse? ToCombinedResponse(OfferResponse? resp, bool isSell)
+            CombinedResponse? ToCombinedResponse(OfferResponse? resp, bool isSell)
             {
                 if (resp == null) return null;
 
-                return new(resp.Offers, resp.Total,
+                return new(filter(resp.Offers).ToList(), resp.Total,
                     SellExhausted: isSell ? resp.Remaining == 0 : true,
                     BuyExhausted: !isSell ? resp.Remaining == 0 : true);
             }
@@ -130,27 +143,6 @@ public sealed class OfferReader(PeachApiClient client,
             }
 
             return result;
-        }
-
-        // NOTE: it seems that the amount filter in Peach API does not work as expected
-        static IEnumerable<OfferSummary> enforceAmountRangeFilter(decimal amountMin, decimal amountMax,
-            IEnumerable<OfferSummary> summaries)
-        {
-            var unwanted = summaries.Where(s =>
-                s.Type == OfferSummaryType.Buy &&
-                (s.Quote.AmountSat < amountMin || s.QuoteMax.AmountSat > amountMax)
-            );
-
-            return summaries.Except(unwanted);
-        }
-        
-        static IEnumerable<OfferSummary> applyMinSpreadFilter(IEnumerable<OfferSummary> summaries,
-            float? minSpread)
-        {
-            var unwanted = summaries.Where(s =>
-                s.SpreadPc != null && s.SpreadPc.Value < minSpread);
-
-            return summaries.Except(unwanted);
         }
     }
 

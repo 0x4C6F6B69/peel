@@ -24,10 +24,10 @@ public static class OfferSummaryExtension
             QuotePriceFiatBase = summary.Quote.PriceFiatBase,
             QuotePriceFiat = summary.Quote.PriceFiat,
 
-            QuoteMaxAmountSat = summary.QuoteMax?.AmountSat,
-            QuoteMaxAmountBtc = summary.QuoteMax?.AmountBtc,
-            QuoteMaxPriceFiatBase = summary.QuoteMax?.PriceFiatBase,
-            QuoteMaxPriceFiat = summary.QuoteMax?.PriceFiat,
+            //QuoteMaxAmountSat = summary.QuoteMax?.AmountSat,
+            //QuoteMaxAmountBtc = summary.QuoteMax?.AmountBtc,
+            //QuoteMaxPriceFiatBase = summary.QuoteMax?.PriceFiatBase,
+            //QuoteMaxPriceFiat = summary.QuoteMax?.PriceFiat,
 
             MeansOfPayment = JsonSerializer.Serialize(summary.MeansOfPayment, jsonOptions)
         };

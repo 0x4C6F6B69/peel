@@ -33,6 +33,6 @@ public abstract record class OfferSummaryBase
 public record class OfferSummary : OfferSummaryBase
 {
     public required OfferQuote Quote { get; init; }
-    public OfferQuote? QuoteMax { get; set; }
+    //public OfferQuote? QuoteMax { get; set; }
     public required Dictionary<string, List<string>> MeansOfPayment { get; init; }
 }
