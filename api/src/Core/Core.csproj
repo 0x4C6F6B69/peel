@@ -30,7 +30,7 @@
   <Target Name="UpdateBuildNumber" BeforeTargets="BeforeBuild">
     <PropertyGroup>
       <PowerShellExe>powershell</PowerShellExe>
-      <BuildScript>$(MSBuildProjectDirectory)\..\..\scripts\incrementBuild.ps1</BuildScript>
+      <BuildScript>$(MSBuildProjectDirectory)\..\..\..\scripts\incrementBuild.ps1</BuildScript>
     </PropertyGroup>
 
     <Message Text="Running build number update..." Importance="high" />
