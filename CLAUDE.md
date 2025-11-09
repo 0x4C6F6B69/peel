@@ -3,9 +3,9 @@
 ## Purpose
 Web API providing a flexible layer for exploring Peach Bitcoin offers with enhanced filtering capabilities. Critical context: Peach API removed native filtering from search endpoints, forcing client-side implementation.
 
-## Solution Structure
+## API solution (.NET/C#)
 
-### Core Project (`src/Core`)
+### Core Project (`api/src/Core`)
 Business logic layer transforming PeachClient offers into `OfferSummary` types.
 
 **Key Dependencies:**
@@ -13,7 +13,7 @@ Business logic layer transforming PeachClient offers into `OfferSummary` types.
 - `SharpX`: Functional programming utilities
 
 **Core Components:**
-#### Services (`src/Core/Services`)
+#### Services (`api/src/Core/Services`)
 - **OfferReader**: Main facade for offer retrieval
   - Paginates through Peach API (100/page, 150ms cooldown)
   - Implements client-side filtering (amount, spread, reputation) since Peach API lacks it
@@ -25,27 +25,27 @@ Business logic layer transforming PeachClient offers into `OfferSummary` types.
   - Fetches BTC market price via PeachClient
 - **BinanceClient**: Direct Binance API integration for market data
 
-#### Models (`src/Core/Models`)
+#### Models (`api/src/Core/Models`)
 - **OfferSummary**: Primary domain model
 - **OfferSummaryFlat**: Flattened for CSV export
 - **OfferSearchCriteria**: Abstract base for filtering
 
-#### Infrastructure (`src/Core/Infrastructure`)
+#### Infrastructure (`api/src/Core/Infrastructure`)
 - **Mapper**: PeachClient `Offer` → `OfferSummary` conversion
 - **Converter**: Unit conversions
 
-### WebApi Project (`src/WebApi`)
+### WebApi Project (`api/src/WebApi`)
 ASP.NET Core minimal API exposing endpoints.
 
 **Key Handlers:**
-#### OffersHandler (`src/WebApi/Handlers/OffersHandler.cs:18`)
+#### OffersHandler (`api/src/WebApi/Handlers/OffersHandler.cs:18`)
 - **POST** `/offers/summary`: Search offers with criteria
   - Query params: `format` (Default/Flat/Csv), `groupBy` (None/Spread/FiatPrice)
   - Returns `SummaryResponse<T>` with errors, BTC price, default fiat
   - CSV output via `CsvExtensions.ToCsvTextAsync`
 - **GET** `/offers/summary/{id}` - Single offer by summary ID
 
-#### MarketHandler (`src/WebApi/Handlers/MarketHandler.cs`)
+#### MarketHandler (`api/src/WebApi/Handlers/MarketHandler.cs`)
 - **GET** `/market/volatility/{hours}`: BTC volatility analysis
 - **GET** `/market/price/BTC`: Current BTC market price
 
@@ -71,3 +71,7 @@ Filters applied:
 - Keep the code as clean and simple as possible, while adhering to the existing style
 - Do not remove features arbitrarily unless explicitly requested
 - Do not create unit tests unless explicitly requested
+
+## Console Client (Python)
+
+Details defined in `docs/console-client.md`.
