@@ -1,0 +1,27 @@
+# Byte-compiled / optimized / DLL files
+**/__pycache__/
+**/*.pyc
+
+# Virtual environments
+.venv/
+env/
+venv/
+
+# VS Code settings
+.vscode/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Logs and local state
+*.log
+*.sqlite3
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# AI
+.claude/settings.local.json
